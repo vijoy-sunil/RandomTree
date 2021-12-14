@@ -1,0 +1,36 @@
+   
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build with Clang",
+            "type": "shell",
+            "command": "clang++",
+			"args": [
+				"-g",
+				"-std=c++17",
+				"-stdlib=libc++",
+                
+                "--include-directory=${workspaceFolder}/Include/Simulation/",
+                "--include-directory=${workspaceFolder}/Include/Utils/",
+				"--include-directory=${workspaceFolder}/Include/Visualization/",   
+
+				"/opt/homebrew/Cellar/glfw/3.3.5/lib/libglfw.3.dylib",
+                
+                "${workspaceFolder}/Source/Simulation/*.cpp",
+                "${workspaceFolder}/Source/Utils/*.cpp",
+                "${workspaceFolder}/Source/Visualization/glad/glad.c",
+                "${workspaceFolder}/Source/Visualization/Grid/*.cpp",
+                "${workspaceFolder}/Source/Visualization/Shader/*.cpp",	
+				"${workspaceFolder}/Source/main.cpp",
+
+				"-o",
+				"${workspaceFolder}/Build/ProductImage.exe"
+			],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}
