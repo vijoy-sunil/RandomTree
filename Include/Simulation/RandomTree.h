@@ -80,11 +80,14 @@ class RandomTreeClass: public GridClass{
         */
         void getRandomCell(int &i, int &j);
         void getDistanceBetweenCells(int i1, int j1, int i2, int j2);
+        void placeNode(int i, int j);
+        bool isWithinStepDistance(int i1, int j1, int i2, int j2);
+        bool isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2);
         std::vector<std::pair<int, int> > connectTwoCells(int i1, int j1, int i2, int j2);
         void setCellAsObstacleStream(int i1, int j1, int i2, int j2, const int width, 
                                      widthType wType);
         void setCellAsNodeConnectionStream(int i1, int j1, int i2, int j2);
-
+        void clearNodeConnectionStream(int i1, int j1, int i2, int j2);
 
     public:
         RandomTreeClass(int _step, int _N, int _scale, bool noStroke);

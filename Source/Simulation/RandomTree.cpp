@@ -42,6 +42,26 @@ void RandomTreeClass::getDistanceBetweenCells(int i1, int j1, int i2, int j2){
 
 }
 
+/* place node 1 step away from source node along the line
+ * connecting source node and random node at (i,j)
+*/
+void RandomTreeClass::placeNode(int i, int j){
+
+}
+
+/* check if (i2,j2) is within step distance of (i1,j1)
+*/
+bool RandomTreeClass::isWithinStepDistance(int i1, int j1, int i2, int j2){
+
+}
+
+/* check if (i2,j2) is within neighborood distance of (i1,j1)
+*/
+bool RandomTreeClass::isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2){
+
+}
+
+
 /* return cell coordinates between (i1,j1) and (i2,j2)
 */
 std::vector<std::pair<int, int> > RandomTreeClass::connectTwoCells
@@ -104,6 +124,19 @@ void RandomTreeClass::setCellAsNodeConnectionStream(int i1, int j1, int i2, int 
         int px = points[i].first;
         int py = points[i].second;
         setCellAsNodeConnection(px, py); 
+    }
+}
+
+/* remove path between two nodes
+*/
+void RandomTreeClass::clearNodeConnectionStream(int i1, int j1, int i2, int j2){
+    std::vector<std::pair<int, int> > points;
+    points = connectTwoCells(i1, j1, i2, j2);
+
+    for(int i = 0; i < points.size(); i++){
+        int px = points[i].first;
+        int py = points[i].second;
+        setCellAsFree(px, py); 
     }
 }
 
