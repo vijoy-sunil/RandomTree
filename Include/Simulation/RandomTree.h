@@ -49,18 +49,23 @@ class RandomTreeClass: public GridClass{
         */
         int startX, startY;
         int endX, endY;
-        /* set a bigger end goal
+        /* set a bigger end goal radius
         */
         int endCellWidth;
+        /* border (obstacle) width
+        */
+        int borderWidth;
+        /* other visual params
+        */
+        int otherCellHighlightWidth, endCellHighlightWidth;
+        float highlightAlpha;
 
-        void getRandomCell(int &i, int &j);
-        void getDistanceBetweenCells(int i1, int j1, int i2, int j2);
-        std::vector<std::pair<int, int> > connectTwoCells(int i1, int j1, int i2, int j2);
-
+        /* util functions
+        */
         int getIdx(int i, int j);
         bool isCellFree(int i, int j);
         bool isCellNode(int i, int j);
-        
+        void setCellColorFromState(int i, int j, cellState state, float alpha = 1.0);
         void setCellAsFree(int i, int j);
         void setCellBlockAsFree(int i, int j, int width);
         void setCellAsObstacle(int i, int j);
@@ -68,14 +73,18 @@ class RandomTreeClass: public GridClass{
         void setCellAsNodeConnection(int i, int j);
         void setCellAsStartCell(int i, int j);
         void setCellAsEndCell(int i, int j);
-
-        void setCellColorFromState(int i, int j, cellState state, float alpha = 1.0);
+        void highlightCell(int i, int j, cellState state);
+        void deHighlightCell(int i, int j);
+        
+        /* primary functions
+        */
+        void getRandomCell(int &i, int &j);
+        void getDistanceBetweenCells(int i1, int j1, int i2, int j2);
+        std::vector<std::pair<int, int> > connectTwoCells(int i1, int j1, int i2, int j2);
         void setCellAsObstacleStream(int i1, int j1, int i2, int j2, const int width, 
                                      widthType wType);
         void setCellAsNodeConnectionStream(int i1, int j1, int i2, int j2);
 
-        void highlightCell(int i, int j, cellState state);
-        void deHighlightCell(int i, int j);
 
     public:
         RandomTreeClass(int _step, int _N, int _scale, bool noStroke);

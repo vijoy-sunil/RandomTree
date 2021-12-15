@@ -15,7 +15,19 @@ GridClass(_N, _scale, noStroke){
 
     startX = 0; startY = 0;
     endX = 0; endY = 0;
+
     endCellWidth = 0.02 * N;
+    borderWidth = 0.03 * N;
+    /* this highlight width is used for START_CELL or NODE
+    */
+    otherCellHighlightWidth = 0.01 * N;
+    /* this highlight width is used for END_CELL
+    */
+    endCellHighlightWidth = 0.03 * N;
+    /* used for START_CELL or END_CELL highlight alpha, for other
+     * states it will be 1.0
+    */
+    highlightAlpha = 0.3;
 }
 
 RandomTreeClass::~RandomTreeClass(void){
@@ -61,114 +73,6 @@ std::vector<std::pair<int, int> > RandomTreeClass::connectTwoCells
     return points;
 }
 
-int RandomTreeClass::getIdx(int i, int j){
-    return (i + (j * N));
-}
-
-bool RandomTreeClass::isCellFree(int i, int j){
-    return cellCurr[getIdx(i, j)] == FREE;
-}
-
-/* check if the cell is a node, or start cell or even an
- * end cell
-*/
-bool RandomTreeClass::isCellNode(int i, int j){
-    return cellCurr[getIdx(i, j)] >= NODE;
-}
-
-void RandomTreeClass::setCellAsFree(int i, int j){
-    cellCurr[getIdx(i, j)] = FREE;
-    /* set color according to cell state
-    */
-    setCellColorFromState(i, j, FREE);
-}
-
-/* NOTE: this op has to be performed with (i,j) as center of
- * the block
-*/
-void RandomTreeClass::setCellBlockAsFree(int i, int j, int width){
-    int r, c;
-    for(r = -width; r <= width; r++){
-        for(c = -width; c <= width; c++){
-            if(isCellNode(i + r, j + c)){
-                cellCurr[getIdx(i + r, j + c)] = FREE;
-                /* set color according to cell state
-                */
-                setCellColorFromState(i + r, j + c, FREE);   
-            }        
-        }
-    }
-}
-
-void RandomTreeClass::setCellAsObstacle(int i, int j){
-    cellCurr[getIdx(i, j)] = OBSTACLE;
-    /* set color according to cell state
-    */
-    setCellColorFromState(i, j, OBSTACLE);
-}
-
-void RandomTreeClass::setCellAsNode(int i, int j){
-    cellCurr[getIdx(i, j)] = NODE;
-    /* set color according to cell state
-    */
-    setCellColorFromState(i, j, NODE);
-}
-
-void RandomTreeClass::setCellAsNodeConnection(int i, int j){
-    /* Make sure we aren't overwriting a different state, i.e
-     * node connection is formed over free cells only
-    */
-    if(isCellFree(i, j)){
-        cellCurr[getIdx(i, j)] = NODE_CONNECTION;
-        /* set color according to cell state
-        */
-        setCellColorFromState(i, j, NODE_CONNECTION);
-    }
-}
-
-/* different from other set functions, it saves the value
-*/ 
-void RandomTreeClass::setCellAsStartCell(int i, int j){
-    cellCurr[getIdx(i, j)] = START_CELL;
-    /* set color according to cell state
-    */
-    setCellColorFromState(i, j, START_CELL);
-    /* save values
-    */
-    startX = i;
-    startY = j;
-}
-
-/* different from other set functions, it saves the value, and
- * the width is higher for an end cell
-*/ 
-void RandomTreeClass::setCellAsEndCell(int i, int j){
-    /* save values
-    */
-    endX = i;
-    endY = j;
-
-    int r, c;
-    for(r = -endCellWidth; r <= endCellWidth; r++){
-        for(c = -endCellWidth; c <= endCellWidth; c++){
-            if(isCellFree(i + r, j + c)){
-                cellCurr[getIdx(i + r, j + c)] = END_CELL;
-                /* set color according to cell state
-                */
-                setCellColorFromState(i + r, j + c, END_CELL);   
-            }        
-        }
-    }
-}
-
-void RandomTreeClass::setCellColorFromState(int i, int j, cellState state, float alpha){
-    colorVal cVal = state == FREE ? whiteVal : state == OBSTACLE ? blackVal :
-                    state == NODE ? blueVal : state == START_CELL ? greenVal :
-                    state == NODE_CONNECTION ? blueVal : redVal;
-
-    genCellColor(i, j, cVal, alpha);
-}
-
 /* used to create line obstacles (walls), this also takes
  * in the width parameter
 */
@@ -203,43 +107,7 @@ void RandomTreeClass::setCellAsNodeConnectionStream(int i1, int j1, int i2, int 
     }
 }
 
-/* we don't change the cellCurr value for the highlighted cells,
- * instead we only change the color. This is just to improve 
- * visibility
-*/
-void RandomTreeClass::highlightCell(int i, int j, cellState state){
-    /* set highlight width
-     * NOTE: end goal cell has a higher width, so highlight width 
-     * should be higher as well
-    */
-    int width = (state == START_CELL || state == NODE) ? 0.01 * N : 0.03 * N;
-    /* this function is also use to de-highlight cells by passing in 
-     * state as FREE, so we need the alpha in this case to be 1.0
-    */
-    float alpha = (state == FREE || state == NODE) ? 1.0 : 0.3;
-
-    for(int r = -width; r <= width; r++){
-        for(int c = -width; c <= width; c++){
-            /* don't highligh over obstacles or the focus cell itself
-            */
-            if(isCellFree(i + r, j + c))
-                setCellColorFromState(i + r, j + c, state, alpha);         
-        }
-    }
-}
-
-void RandomTreeClass::deHighlightCell(int i, int j){
-    /* dehighlight by setting color as FREE and alpha to 1.0
-    */
-    highlightCell(i, j, FREE);
-}
-
 void RandomTreeClass::setObstacleCells(void){
-    /* set border wall first, borderWidth in terms of number
-     * of N value
-    */
-    const int borderWidth = 0.03 * N;
-
     setCellAsObstacleStream(0, 0, N-1, 0, borderWidth, BOTTOM);
     setCellAsObstacleStream(N-1, 0, N-1, N-1, borderWidth, RIGHT);
     setCellAsObstacleStream(0, N-1, N-1, N-1, borderWidth, TOP);
@@ -293,9 +161,7 @@ void RandomTreeClass::setStartAndEndCells(void){
         if(startCellSet && !endCellSet && mouseClicked){
             mouseClicked = false;
             mouseAction(xPos, yPos);
-            /* check if that cell is already a node cell, allows us to
-             * toggle selection before confirming our input
-            */
+
             if(isCellFree(cellX, cellY)){
                /* clear previous selection, this is a wrapper around 
                  * setCellAsFree
