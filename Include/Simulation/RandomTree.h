@@ -2,6 +2,7 @@
 #define SIMULATION_RANDOMTREE_H
 
 #include "../../Include/Visualization/Grid/Grid.h"
+#include "../../Include/Utils/Tree.h"
 #include <vector>
 
 /* all available states of a cell in the grid
@@ -29,7 +30,7 @@ typedef enum{
     OTHER
 }widthType;
 
-class RandomTreeClass: public GridClass{
+class RandomTreeClass: public GridClass, public TreeClass{
     private:
         /* This will be the NxN grid that we will be working on
         */

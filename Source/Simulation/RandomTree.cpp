@@ -6,7 +6,7 @@
 */
 
 RandomTreeClass::RandomTreeClass(int _step, int _N, int _scale, bool noStroke): 
-GridClass(_N, _scale, noStroke){
+GridClass(_N, _scale, noStroke), TreeClass(){
     cellCurr = (int*)calloc(N * N, sizeof(int));
     step = _step;
 
