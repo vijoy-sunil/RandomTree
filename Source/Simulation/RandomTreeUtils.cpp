@@ -8,6 +8,10 @@ bool RandomTreeClass::isCellFree(int i, int j){
     return cellCurr[getIdx(i, j)] == FREE;
 }
 
+bool RandomTreeClass::isCellObstacle(int i, int j){
+    return cellCurr[getIdx(i, j)] == OBSTACLE;
+}
+
 /* check if the cell is a node, or node connection, start cell
  * or even an end cell
 */

@@ -64,6 +64,7 @@ class RandomTreeClass: public GridClass{
         */
         int getIdx(int i, int j);
         bool isCellFree(int i, int j);
+        bool isCellObstacle(int i, int j);
         bool isCellNode(int i, int j);
         void setCellColorFromState(int i, int j, cellState state, float alpha = 1.0);
         void setCellAsFree(int i, int j);

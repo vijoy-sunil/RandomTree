@@ -34,6 +34,10 @@ RandomTreeClass::~RandomTreeClass(void){
     free(cellCurr);
 }
 
+/* The generated random cell has to be in the free space,
+ * and the path connecting them shouldn't pass through
+ * any obstacle
+*/
 void RandomTreeClass::getRandomCell(int &i, int &j){
 
 }
@@ -52,13 +56,13 @@ void RandomTreeClass::placeNode(int i, int j){
 /* check if (i2,j2) is within step distance of (i1,j1)
 */
 bool RandomTreeClass::isWithinStepDistance(int i1, int j1, int i2, int j2){
-
+    return true;
 }
 
 /* check if (i2,j2) is within neighborood distance of (i1,j1)
 */
 bool RandomTreeClass::isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2){
-
+    return true;
 }
 
 
