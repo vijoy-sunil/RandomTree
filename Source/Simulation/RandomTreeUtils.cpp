@@ -263,10 +263,19 @@ void RandomTreeClass::highlightPath(std::vector<std::pair<int, int>> path, cellS
         std::vector<std::pair<int, int> > points = connectTwoCells(p1x, p1y, p2x, p2y);
         for(int k = 0; k < points.size(); k++){
             for(int r = -width; r <= width; r++){
-                /* highlight only over free cells, and in the x direction only
-                */
-                if(isCellFree(points[k].first + r, points[k].second))
-                    setCellColorFromState(points[k].first + r, points[k].second, state, alpha); 
+                for(int c = -width; c<= width; c++){
+                    /* boundary guards
+                    */
+                    if(points[k].first + r < 0 || points[k].first + r > N-1)
+                        continue;
+                    if(points[k].second + c < 0 || points[k].second + c > N-1)
+                        continue;
+
+                    /* highlight only over free cells, and in the x direction only
+                    */
+                    if(isCellFree(points[k].first + r, points[k].second + c))
+                        setCellColorFromState(points[k].first + r, points[k].second + c, state, alpha); 
+                }
             }
         }
     }

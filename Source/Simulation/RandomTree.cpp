@@ -217,6 +217,13 @@ bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
 bool RandomTreeClass::isGoalReached(int i, int j){
     for(int r = -1; r <= 1; r++){
         for(int c = -1; c <= 1; c++){
+            /* boundary guards
+            */
+            if(i + r < 0 || i + r > N-1)
+                continue;
+            if(j + c < 0 || j + c > N-1)
+                continue;
+                
             if(isCellEndCell(i + r, j + c))
                 return true;
         }
