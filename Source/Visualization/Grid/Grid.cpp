@@ -434,20 +434,18 @@ void GridClass::processInput(GLFWwindow* window){
         glfwSetWindowShouldClose(window, true);
 
     /* Added input controls here
-     * S - confirm start cell position
+     * S - confirm start cell position (only once)
      * E - confirm end cell position
-     * Z - reset
     */
     if(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+        /* NOTE: we cannot reset the start cell since the tree has
+         * already grown from the root node, if we were to set another
+         * node as a root node, then there exist a node who doesn't have
+         * a parent - which conflicts the idea of a tree
+        */
         startCellSet = true;
     if(glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
         endCellSet = true;
-    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS){
-        startCellSet = false;
-        endCellSet = false;
-        readyToStart = false;
-        mouseClicked = false;
-    }
 }
 
 void GridClass::openGLClose(void){

@@ -11,8 +11,13 @@ const int scale = 1;
 */
 #define PREDEF_OBSTACLE     1
 #define RANDOM_OBSTACLE     0
-/* step distance
+/* Algorithm params
 */
-const int step = 5;
+const int step = 10;
+const int neighborhood = 20;
+/* algorithm options
+*/
+#define RAPID_RANDOM_TREE         1
+#define RAPID_RANDOM_TREE_STAR    0
 #endif /* SIMULATION_CONSTANTS_H
 */

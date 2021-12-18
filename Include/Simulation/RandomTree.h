@@ -4,6 +4,8 @@
 #include "../../Include/Visualization/Grid/Grid.h"
 #include "../../Include/Utils/Tree.h"
 #include <vector>
+#include <cmath> /* for for round(), pow(). sqrt()
+*/
 
 /* all available states of a cell in the grid
 */
@@ -39,13 +41,12 @@ class RandomTreeClass: public GridClass, public TreeClass{
          * along the line connected to random cell
         */
         int step;
-        /* final distance between start and end cells connected via
-         * the computer path
+        /* the nieghborhood distance to rearrange the min cost path
         */
-        int finalDistance;
+        int neighborhood;
         /* number of nodes/cells added
         */
-        int numCellsAdded;
+        int numNodesAdded;
         /* start and end goal cell position
         */
         int startX, startY;
@@ -56,9 +57,15 @@ class RandomTreeClass: public GridClass, public TreeClass{
         /* border (obstacle) width
         */
         int borderWidth;
+        /* final output boolean
+        */
+        bool pathFound;
+        /* holds node coords from end cell to start cell
+        */
+        std::vector<std::pair<int, int>> path;
         /* other visual params
         */
-        int otherCellHighlightWidth, endCellHighlightWidth;
+        int otherCellHighlightWidth, endCellHighlightWidth, pathHighlightWidth;
         float highlightAlpha;
 
         /* util functions
@@ -66,8 +73,9 @@ class RandomTreeClass: public GridClass, public TreeClass{
         int getIdx(int i, int j);
         bool isCellFree(int i, int j);
         bool isCellObstacle(int i, int j);
-        bool isCellNode(int i, int j);
+        bool isCellEndCell(int i, int j);
         void setCellColorFromState(int i, int j, cellState state, float alpha = 1.0);
+        void setCellBlockToState(int i, int j, cellState state, int width);
         void setCellAsFree(int i, int j);
         void setCellBlockAsFree(int i, int j, int width);
         void setCellAsObstacle(int i, int j);
@@ -75,24 +83,32 @@ class RandomTreeClass: public GridClass, public TreeClass{
         void setCellAsNodeConnection(int i, int j);
         void setCellAsStartCell(int i, int j);
         void setCellAsEndCell(int i, int j);
-        void highlightCell(int i, int j, cellState state);
-        void deHighlightCell(int i, int j);
-        
-        /* primary functions
-        */
-        void getRandomCell(int &i, int &j);
-        void getDistanceBetweenCells(int i1, int j1, int i2, int j2);
-        void placeNode(int i, int j);
-        bool isWithinStepDistance(int i1, int j1, int i2, int j2);
-        bool isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2);
-        std::vector<std::pair<int, int> > connectTwoCells(int i1, int j1, int i2, int j2);
         void setCellAsObstacleStream(int i1, int j1, int i2, int j2, const int width, 
-                                     widthType wType);
+        widthType wType);
         void setCellAsNodeConnectionStream(int i1, int j1, int i2, int j2);
         void clearNodeConnectionStream(int i1, int j1, int i2, int j2);
+        std::vector<std::pair<int, int> > connectTwoCells(int i1, int j1, int i2, int j2);
+        void highlightCell(int i, int j, cellState state);
+        void highlightPath(std::vector<std::pair<int, int>> path, cellState state);
+        void deHighlightCell(int i, int j);
+        void deHighlightPath(std::vector<std::pair<int, int>> path);
+        void restartRenderLoop(void);
+        int getRandomAmount(int start, int end);
+
+        /* primary functions
+        */
+        std::pair<int, int> getRandomCell(void);
+        std::pair<int, int> getNearestNode(int i, int j);
+        float getDistanceBetweenCells(int i1, int j1, int i2, int j2);
+        bool isNodeValid(int& i, int& j);
+        bool placeNode(int i, int j, std::pair<int, int>& newNode);
+        bool isGoalReached(int i, int j);
+        bool isPathAlreadyExist(std::pair<int, int>& lastNode);
+        bool isWithinStepDistance(int i1, int j1, int i2, int j2);
+        bool isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2);
 
     public:
-        RandomTreeClass(int _step, int _N, int _scale, bool noStroke);
+        RandomTreeClass(int _step, int _neighborhood, int _N, int _scale, bool noStroke);
         ~RandomTreeClass(void);
 
         /* override functions

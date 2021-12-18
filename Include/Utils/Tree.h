@@ -5,27 +5,35 @@
 #include <map>
 
 typedef struct node{
+    /* node coordinates
+    */
     std::pair<int, int> pos;
+    /* parent of the node
+    */
     struct node *parent;
-    int distanceFromParent;
-    std::vector<node*> children;
 }node_t;
 
 class TreeClass{
     private:
+        /* the root node will be the start cell
+        */
         node_t *root;
+
+    protected:
+        /* the map keeps account of all the nodes
+        */
         std::map<std::pair<int, int>, node_t*> mp;
 
-        bool getNumChildren(node_t* source);
+        void showMap(void);
         node_t* getNodeFromCell(int i, int j);
+        std::vector<std::pair<int, int>> getPath(std::pair<int, int> lastAddedNode);
 
     public:
         TreeClass(void);
         ~TreeClass(void);
 
         bool createNode(std::pair<int, int> cellPos);
-        bool addEdge(node_t *source, node_t *dest, int dist);
-        bool removeEdge(node_t *source, node_t *dest);
+        bool addEdge(node_t *source, node_t *dest);
 };
 #endif /* UTILS_TREE_H
 */

@@ -2,7 +2,7 @@
 #include "../Include/Simulation/RandomTree.h"
 
 int main(void){
-    RandomTreeClass RandomTree(step, N, scale, true);
+    RandomTreeClass RandomTree(step, neighborhood, N, scale, true);
     RandomTree.runRender();
     return 0;
 }
