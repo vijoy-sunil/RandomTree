@@ -178,7 +178,11 @@ bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
         */
         node_t *source = getNodeFromCell(nearX, nearY);
         node_t *dest = getNodeFromCell(newNodeX, newNodeY);
-        if(!addEdge(source, dest))
+        /* compute distance again since it may have been overwritten
+         * during validation or when d <= step 
+        */
+        d = getDistanceBetweenCells(nearX, nearY, newNodeX, newNodeY);
+        if(!addEdge(source, dest, d))
             assert(false);
 
         /* check if you have reached goal after the addition of
@@ -354,47 +358,60 @@ void RandomTreeClass::setStartAndEndCells(void){
 }
 
 void RandomTreeClass::simulationStep(void){
-    /* this is set to false via reset or if start and end cells have
-     * not been selected
-    */
-    if(readyToStart){
-        /* holds last added node that reaced the end cell
+#if STEP_MODE == 1
+    if(stepMode){
+        /* add delay, this to enable single step mode
         */
-        std::pair<int, int> newNode;
-        /* STEP 0, check if a path already exists
+        int delayCnt = 90000000;
+        while(delayCnt--);
+#endif
+        /* this is set to false via reset or if start and end cells have
+        * not been selected
         */
-        if(isPathAlreadyExist(newNode))
-            pathFound = true;
-        else{
-            /* STEP1, get a valid random node
+        if(readyToStart){
+            /* holds last added node that reaced the end cell
             */
-            std::pair<int, int> rNode = getRandomCell();
-            /* STEP2, place node at step away from nearest node
+            std::pair<int, int> newNode;
+            /* STEP 0, check if a path already exists
             */
+            if(isPathAlreadyExist(newNode))
+                pathFound = true;
+            else{
+                /* STEP1, get a valid random node
+                */
+                std::pair<int, int> rNode = getRandomCell();
+                /* STEP2, place node at step away from nearest node
+                */
 #if RAPID_RANDOM_TREE == 1
-            placeNode(rNode.first, rNode.second, newNode); 
+                placeNode(rNode.first, rNode.second, newNode); 
 #endif
 
 #if RAPID_RANDOM_TREE_STAR == 1
 #endif
-        }
-        /* STEP 3, check if you have reached end cell
-        */
-        if(pathFound){
-            /* clear previous path before computing a new one
-            */
-            if(path.size() != 0){
-                deHighlightPath(path);
-                path.clear();
             }
-            
-            std::cout<<"Goal Reached !!! "<<newNode.first<<","<<newNode.second<<std::endl;
-            std::cout<<"Number of Nodes Added: "<<numNodesAdded<<std::endl;
-            path = getPath(newNode);
-            /* display path
+            /* STEP 3, check if you have reached end cell
             */
-            highlightPath(path, END_CELL);
-            restartRenderLoop();
-        }   
+            if(pathFound){
+                /* clear previous path before computing a new one
+                */
+                if(path.size() != 0){
+                    deHighlightPath(path);
+                    path.clear();
+                }
+                
+                std::cout<<"Goal Reached !!! "<<newNode.first<<","<<newNode.second<<std::endl;
+                std::cout<<"Number of Nodes Added: "<<numNodesAdded<<std::endl;
+                path = getPath(newNode);
+                /* display path
+                */
+                highlightPath(path, END_CELL);
+                restartRenderLoop();
+            }   
+        }
+#if STEP_MODE == 1
+        /* set to true in process input fn
+        */ 
+        stepMode = false;
     }
+#endif
 }

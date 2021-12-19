@@ -2,6 +2,9 @@
 
 /* Global variables common
 */
+/* step mode
+*/
+volatile bool stepMode = true;
 /* This is set to true when the start and end goal cells
  * are set
 */

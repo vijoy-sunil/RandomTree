@@ -433,6 +433,11 @@ void GridClass::processInput(GLFWwindow* window){
     if(glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
 
+    /* step mode
+    */
+    if(glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
+        stepMode = true;
+
     /* Added input controls here
      * S - confirm start cell position (only once)
      * E - confirm end cell position

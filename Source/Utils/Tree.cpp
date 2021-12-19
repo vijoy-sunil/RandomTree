@@ -13,6 +13,8 @@ TreeClass::~TreeClass(void){
         free(it->second);
 }
 
+/* (i,j) -|- mode_t* are the map contents
+*/
 void TreeClass::showMap(void){
     for(auto it = mp.begin(); it != mp.end(); it++){
         std::cout<<"("<<it->first.first<<","<<it->first.second<<")";
@@ -50,8 +52,13 @@ bool TreeClass::createNode(std::pair<int, int> cellPos){
     newNode->pos = cellPos;
     newNode->parent = NULL;
 
-    if(root == NULL)
+    if(root == NULL){
         root = newNode;
+        /* set root's distanceToRoot value here, other node's
+         * distanceToRoot will be set when adding edge
+        */
+        root->distanceToRoot = 0;
+    }
 
     /* update map to help in retreiving the node using cell
      * coordinates or freeing up node memory
@@ -69,13 +76,16 @@ bool TreeClass::createNode(std::pair<int, int> cellPos){
 /* NOTE: source will be the parent and dest will be a child
  * always
 */
-bool TreeClass::addEdge(node_t *source, node_t *dest){
+bool TreeClass::addEdge(node_t *source, node_t *dest, float distance){
     if(source == NULL || dest == NULL)
         return false;
 
     /* from child's pov
     */
     dest->parent = source;
+    /* distance = distance between source and dest
+    */
+    dest->distanceToRoot = source->distanceToRoot + distance;
     return true;
 }
 

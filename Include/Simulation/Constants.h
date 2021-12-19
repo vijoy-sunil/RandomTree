@@ -1,6 +1,9 @@
 #ifndef SIMULATION_CONSTANTS_H
 #define SIMULATION_CONSTANTS_H
 
+/* step through render loop
+*/
+#define STEP_MODE               1
 /* grid dimension NxN
 */
 const int N = 800;
@@ -9,8 +12,8 @@ const int N = 800;
 const int scale = 1;
 /* choose obstacle pattern
 */
-#define PREDEF_OBSTACLE     1
-#define RANDOM_OBSTACLE     0
+#define PREDEF_OBSTACLE         1
+#define RANDOM_OBSTACLE         0
 /* Algorithm params
 */
 const int step = 10;

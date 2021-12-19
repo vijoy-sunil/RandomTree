@@ -3,6 +3,7 @@
 
 /* externs
 */
+extern volatile bool stepMode;
 extern volatile bool readyToStart, startCellSet, endCellSet;
 extern double xPos, yPos;
 extern volatile bool mouseClicked;
