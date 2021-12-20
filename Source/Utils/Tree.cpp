@@ -1,6 +1,7 @@
 #include "../../Include/Utils/Tree.h"
 #include <stdlib.h>
 #include <iostream>
+#include <cmath>
 
 TreeClass::TreeClass(void){
     root = NULL;
@@ -54,10 +55,6 @@ bool TreeClass::createNode(std::pair<int, int> cellPos){
 
     if(root == NULL){
         root = newNode;
-        /* set root's distanceToRoot value here, other node's
-         * distanceToRoot will be set when adding edge
-        */
-        root->distanceToRoot = 0;
     }
 
     /* update map to help in retreiving the node using cell
@@ -76,17 +73,42 @@ bool TreeClass::createNode(std::pair<int, int> cellPos){
 /* NOTE: source will be the parent and dest will be a child
  * always
 */
-bool TreeClass::addEdge(node_t *source, node_t *dest, float distance){
+bool TreeClass::addEdge(node_t* source, node_t* dest){
     if(source == NULL || dest == NULL)
         return false;
 
     /* from child's pov
     */
     dest->parent = source;
-    /* distance = distance between source and dest
-    */
-    dest->distanceToRoot = source->distanceToRoot + distance;
     return true;
+}
+
+bool TreeClass::removeEdge(node_t* source, node_t* dest){
+    if(source == NULL || dest == NULL)
+        return false;
+
+    /* from child's pov
+    */   
+    dest->parent = NULL;
+    return true;
+}
+
+float TreeClass::getDistanceToRoot(node_t* dest){
+    float d = 0;
+    if(dest == NULL)
+        return d;
+
+    while(dest->parent != NULL){
+        int i1 = dest->parent->pos.first;
+        int j1 = dest->parent->pos.second;
+
+        int i2 = dest->pos.first;
+        int j2 = dest->pos.second;
+        d += sqrt(pow((j2 - j1), 2) + pow((i2 - i1), 2));
+        
+        dest = dest->parent;
+    }
+    return d;
 }
 
 

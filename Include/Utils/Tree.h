@@ -8,9 +8,6 @@ typedef struct node{
     /* node coordinates
     */
     std::pair<int, int> pos;
-    /* float distance to root
-    */
-    float distanceToRoot;
     /* parent of the node
     */
     struct node *parent;
@@ -36,7 +33,9 @@ class TreeClass{
         ~TreeClass(void);
 
         bool createNode(std::pair<int, int> cellPos);
-        bool addEdge(node_t *source, node_t *dest, float distance);
+        bool addEdge(node_t* source, node_t* dest);
+        bool removeEdge(node_t* source, node_t* dest);
+        float getDistanceToRoot(node_t* dest);
 };
 #endif /* UTILS_TREE_H
 */
