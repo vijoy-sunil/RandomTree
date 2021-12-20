@@ -3,7 +3,7 @@
 
 /* step through render loop
 */
-#define STEP_MODE               1
+#define STEP_MODE               0
 /* grid dimension NxN
 */
 const int N = 800;
@@ -17,10 +17,10 @@ const int scale = 1;
 /* Algorithm params
 */
 const int step = 10;
-const int neighborhood = 20;
+const int neighborhood = 5.0 * step;
 /* algorithm options
 */
-#define RAPID_RANDOM_TREE         1
-#define RAPID_RANDOM_TREE_STAR    0
+#define RAPID_RANDOM_TREE         0
+#define RAPID_RANDOM_TREE_STAR    1
 #endif /* SIMULATION_CONSTANTS_H
 */
