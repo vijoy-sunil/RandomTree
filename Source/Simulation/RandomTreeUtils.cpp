@@ -1,6 +1,8 @@
 #include "../../Include/Simulation/RandomTree.h"
 #include "../../Include/Utils/Common.h"
 #include <random>
+#include <cmath> /* for for round(), pow(). sqrt()
+*/
 
 int RandomTreeClass::getIdx(int i, int j){
     return (i + (j * N));
@@ -86,7 +88,7 @@ void RandomTreeClass::setCellAsNodeConnection(int i, int j){
     cellCurr[getIdx(i, j)] = NODE_CONNECTION;
     /* set color according to cell state
     */
-    setCellColorFromState(i, j, NODE_CONNECTION);
+    setCellColorFromState(i, j, NODE_CONNECTION, nodeConnectionAlpha);
 }
 
 /* different from other set functions, it saves the value
@@ -243,7 +245,7 @@ void RandomTreeClass::highlightCell(int i, int j, cellState state){
 */
 void RandomTreeClass::highlightPath(std::vector<std::pair<int, int>> path, cellState state){
     int width = pathHighlightWidth;
-    float alpha = state == FREE ? 1.0 : 0.3;
+    float alpha = state == FREE ? 1.0 : pathHighlightAlpha;
 
     int n = path.size();
     /* something wrong if the path has only node coord
@@ -321,4 +323,8 @@ int RandomTreeClass::getRandomAmount(int start, int end){
     std::default_random_engine eng(rd());
     std::uniform_real_distribution<> distr(start, end);
     return distr(eng);
+}
+
+float RandomTreeClass::getDistanceBetweenCells(int i1, int j1, int i2, int j2){
+    return sqrt(pow((j2 - j1), 2) + pow((i2 - i1), 2));
 }
