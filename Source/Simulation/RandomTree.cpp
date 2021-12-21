@@ -32,6 +32,15 @@ GridClass(_N, _scale, noStroke), TreeClass(){
      * states it will be 1.0
     */
     highlightAlpha = 0.3;
+    /* used for final path highlight alpha
+    */
+    pathHighlightAlpha = 0.5;
+    /* used for node connection alpha
+    */
+    nodeConnectionAlpha = 0.2;
+    /* num random obstacles
+    */
+    numObstacles = 0.02 * N;
 }
 
 RandomTreeClass::~RandomTreeClass(void){
@@ -60,10 +69,10 @@ std::pair<int, int> RandomTreeClass::getRandomCell(void){
     return randomCell;
 }
 
-/* get nearest node coords from (i,j), calculate distance to
+/* get nearest node coords from random node, calculate distance to
  * all nodes using the map
 */
-std::pair<int, int> RandomTreeClass::getNearestNode(int i, int j){
+std::pair<int, int> RandomTreeClass::getNearestNode(std::pair<int, int> rNode){
     float minDistance = INT_MAX;
     /* nearest node coords
     */
@@ -74,7 +83,7 @@ std::pair<int, int> RandomTreeClass::getNearestNode(int i, int j){
         int nodeX = it->first.first;
         int nodeY = it->first.second;
 
-        float currDistance = getDistanceBetweenCells(i, j, nodeX, nodeY);
+        float currDistance = getDistanceBetweenCells(rNode.first, rNode.second, nodeX, nodeY);
         if(currDistance < minDistance){
             minDistance = currDistance;
             minX = nodeX;
@@ -84,25 +93,23 @@ std::pair<int, int> RandomTreeClass::getNearestNode(int i, int j){
     return std::make_pair(minX, minY);
 }
 
-float RandomTreeClass::getDistanceBetweenCells(int i1, int j1, int i2, int j2){
-    return sqrt(pow((j2 - j1), 2) + pow((i2 - i1), 2));
-}
-
 /* The generated node has to be in the free space, and the path 
  * connecting it and the nearest node shouldn't pass through any 
  * obstacle
 */
-bool RandomTreeClass::isNodeValid(int& i, int& j){
-    std::pair<int, int> nearestNode = getNearestNode(i, j);
+bool RandomTreeClass::isNodeValid(std::pair<int, int> nearestNode, std::pair<int, int>& newNode){
     int nearX = nearestNode.first;
     int nearY = nearestNode.second;
+
+    int newX = newNode.first;
+    int newY = newNode.second;
 
     /* the connectTwoCells outputs the input (i,j) cell
      * as well, so no need to test it separately, but we
      * do need to skip the check for the nearest node
     */
     std::vector<std::pair<int, int> > points;
-    points = connectTwoCells(nearX, nearY, i, j);
+    points = connectTwoCells(nearX, nearY, newX, newY);
 
     int px, py;
     for(int k = 0; k < points.size(); k++){ 
@@ -122,8 +129,8 @@ bool RandomTreeClass::isNodeValid(int& i, int& j){
         if(isCellEndCell(px, py)){
             /* rewrite the generate node
             */
-            i = px;
-            j = py;
+            pathFound = true;
+            newNode = std::make_pair(px, py);
             std::cout<<"Path Found while validation"<<std::endl;
             return true;
         }
@@ -131,17 +138,13 @@ bool RandomTreeClass::isNodeValid(int& i, int& j){
     return true;
 }
 
-/* place node 1 step away from nearest node along the line
- * connecting nearest node and random node at (i,j). Validate
- * the new node before placing it. Finally return nearest node 
- * to draw the path as part of algorithm
-*/
-bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
-    std::pair<int, int> nearestNode = getNearestNode(i, j);
+bool RandomTreeClass::computeNewNodeAndValidate(std::pair<int, int> rNode, 
+std::pair<int, int>& newNode){
+    std::pair<int, int> nearestNode = getNearestNode(rNode);
     int nearX = nearestNode.first;
     int nearY = nearestNode.second;
 
-    float d = getDistanceBetweenCells(nearX, nearY, i, j);
+    float d = getDistanceBetweenCells(rNode.first, rNode.second, nearX, nearY);
     int newNodeX, newNodeY;
     /* https://math.stackexchange.com/questions/175896/finding
      * -a-point-along-a-line-a-certain-distance-away-from-another-point
@@ -151,54 +154,52 @@ bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
      * node, we choose the random node as the new node
     */
     if(d <= step){
-        newNodeX = i;
-        newNodeY = j;
+        newNodeX = rNode.first;
+        newNodeY = rNode.second;
     }
     else{
         t = step/d;
-        newNodeX = ((1 - t) * nearX) + (t * i);
-        newNodeY = ((1 - t) * nearY) + (t * j);
+        newNodeX = ((1 - t) * nearX) + (t * rNode.first);
+        newNodeY = ((1 - t) * nearY) + (t * rNode.second);
     }
 
     /* NOTE: there is a chance that we find the end cell block
      * while validation, in that case we will overwrite newNodeX,Y
     */
-    if(!isNodeValid(newNodeX, newNodeY)){
+    newNode = std::make_pair(newNodeX, newNodeY);
+    if(!isNodeValid(nearestNode, newNode)){
         std::cout<<"Retrying . . . [Invalid new node]"<<std::endl;
         return false;
-    }  
+    }    
+    return true;
+}
 
-    /* add node to tree
+bool RandomTreeClass::createAndConnectNewNode(std::pair<int, int> nearestNode, 
+std::pair<int, int> newNode){
+    /* add node to tree and connect
     */ 
-    if(createNode(std::make_pair(newNodeX, newNodeY))){
-        std::cout<<"Nearest Node: "<<nearX<<","<<nearY<<std::endl;
-        std::cout<<"New Node placed at: "<<newNodeX<<","<<newNodeY<<std::endl;
+    if(createNode(newNode)){
         /* add edge
          * NOTE: source node will always be the parent node
         */
-        node_t *source = getNodeFromCell(nearX, nearY);
-        node_t *dest = getNodeFromCell(newNodeX, newNodeY);
-        /* compute distance again since it may have been overwritten
-         * during validation or when d <= step 
-        */
-        d = getDistanceBetweenCells(nearX, nearY, newNodeX, newNodeY);
-        if(!addEdge(source, dest, d))
+        node_t *source = getNodeFromCell(nearestNode.first, nearestNode.second);
+        node_t *dest = getNodeFromCell(newNode.first, newNode.second);
+
+        if(!addEdge(source, dest))
             assert(false);
 
         /* check if you have reached goal after the addition of
          * new node
         */
-        if(isGoalReached(newNodeX, newNodeY))
+        if(isGoalReached(newNode))
             pathFound = true;
         /* set cell state
         */
-        setCellAsNode(newNodeX, newNodeY);
+        setCellAsNode(newNode.first, newNode.second);
         /* add connection path
         */
-        setCellAsNodeConnectionStream(nearX, nearY, newNodeX, newNodeY);
-        /* store result
-        */
-        newNode = std::make_pair(newNodeX, newNodeY);
+        setCellAsNodeConnectionStream(nearestNode.first, nearestNode.second, 
+        newNode.first, newNode.second);
         numNodesAdded++;
         return true;
     }
@@ -209,6 +210,135 @@ bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
         std::cout<<"Retrying . . . [New node already exists]"<<std::endl;
         return false;
    }
+
+}
+
+/* place node 1 step away from nearest node along the line
+ * connecting nearest node and random node at (i,j). Validate
+ * the new node before placing it. Finally return nearest node 
+ * to draw the path as part of algorithm
+*/
+bool RandomTreeClass::placeNodeRRT(std::pair<int, int> rNode, std::pair<int, int>& newNode){
+    if(!computeNewNodeAndValidate(rNode, newNode))
+        return false;
+
+    /* save the nearest node
+    */
+    std::pair<int, int> nearestNode = getNearestNode(rNode);
+    int nearX = nearestNode.first;
+    int nearY = nearestNode.second;
+    std::cout<<"Nearest Node: "<<nearX<<","<<nearY<<std::endl;
+    std::cout<<"New Node placed: "<<newNode.first<<","<<newNode.second<<std::endl;
+
+    return createAndConnectNewNode(nearestNode, newNode);
+}
+
+/* node placement algorithm for RRT*
+*/
+bool RandomTreeClass::placeNodeRRTStar(std::pair<int, int> rNode, std::pair<int, int>& newNode){
+    /* this step is same as RRT, find newNode that is step away 
+     * from the nearest node
+    */
+    if(!computeNewNodeAndValidate(rNode, newNode))
+        return false;    
+
+    std::cout<<"New Node: "<<newNode.first<<","<<newNode.second<<std::endl;
+
+    float minCost = INT_MAX;
+    node_t *minCostNeighborNode;
+    std::vector<node_t*> neighborhoodNodes;
+
+    /* find nodes that are within the neighborhood distance of 
+     * newNode and compute minimum cost path to newNode
+    */
+    for(auto it = mp.begin(); it != mp.end(); it++){
+        std::pair<int, int> currNodePos = it->first;
+        node_t* currNode = it->second;
+
+        float d = getDistanceBetweenCells(newNode.first, newNode.second, 
+        currNodePos.first, currNodePos.second);
+        if(d <= neighborhood){
+            /* Find minimum cost path to reach newNode through the neighb-
+             * -orhood nodes. Before that we need to validate this neighbor
+             * hood node connection to newNode
+            */ 
+            if(!isNodeValid(currNodePos, newNode)){
+                std::cout<<"Retrying . . . [Invalid new node]"<<std::endl;
+                continue;
+            }  
+            /* if path has been found with newNode (may or may not have 
+             * been overwritten), then we need to break out of this loop
+             * and form edge
+            */
+            if(pathFound){
+                /* reach here if path has been found while validation of connection
+                 * between currNode and newNode
+                */
+                if(!createAndConnectNewNode(currNodePos, newNode))
+                    return false;   
+                else
+                    return true;
+            }
+
+            /* save valid neighborhood nodes
+            */
+            neighborhoodNodes.push_back(currNode);
+            /* compute cost to newNode through currNode
+            */
+            d = getDistanceToRoot(currNode) + 
+            getDistanceBetweenCells(newNode.first, newNode.second, 
+            currNodePos.first, currNodePos.second);
+
+            std::cout<<"Neighborhood Node: "<<currNodePos.first<<","<<currNodePos.second<<" ";
+            std::cout<<"Cost To New Node: "<<d<<std::endl;
+
+            /* save min cost node
+            */
+            if(d < minCost){
+                minCost = d;
+                minCostNeighborNode = currNode;
+            }
+
+        }
+    }
+
+    std::cout<<"Min Cost Neighbor Node: "<<minCostNeighborNode->pos.first<<","
+    <<minCostNeighborNode->pos.second<<std::endl;
+
+    /* add edge from min cost neighbor node to new node
+    */
+    if(!createAndConnectNewNode(minCostNeighborNode->pos, newNode))
+        return false;
+    /* Next, go through the neighborhood nodes and check if we
+     * can reduce the cost from root to itself by going through
+     * the newNode
+    */
+   
+    node_t* currNode = getNodeFromCell(newNode.first, newNode.second);
+    for(int k = 0; k < neighborhoodNodes.size(); k++){
+        float dToNNode = getDistanceToRoot(neighborhoodNodes[k]);
+
+        std::cout<<"Neighborhood Node: "<<neighborhoodNodes[k]->pos.first<<","
+        <<neighborhoodNodes[k]->pos.second<<" ";
+        std::cout<<"dToNNode: "<<dToNNode<<std::endl;
+
+        float dNewBridge = getDistanceBetweenCells(newNode.first, newNode.second, 
+        neighborhoodNodes[k]->pos.first, neighborhoodNodes[k]->pos.second);
+        std::cout<<"dNewBridge: "<<dNewBridge<<std::endl;
+
+        float dNewRoute = getDistanceToRoot(currNode) + dNewBridge;
+        std::cout<<"dNewRoute: "<<dNewRoute<<std::endl;
+
+        if(dNewRoute < dToNNode){
+            std::cout<<"Rerouting . . ."<<std::endl;
+            if(!removeEdge(neighborhoodNodes[k]->parent, neighborhoodNodes[k]))
+                assert(false);
+            if(!addEdge(currNode, neighborhoodNodes[k]))
+                assert(false);
+        }
+    }
+    
+    return true;
 }
 
 /* check if one of the 8 neighbors is an end cell. 
@@ -218,7 +348,10 @@ bool RandomTreeClass::placeNode(int i, int j, std::pair<int, int>& newNode){
  * In case of normal operation, check if the cell itself
  * is an end cell
 */
-bool RandomTreeClass::isGoalReached(int i, int j){
+bool RandomTreeClass::isGoalReached(std::pair<int, int> dNode){
+    int i = dNode.first;
+    int j = dNode.second;
+    
     for(int r = -1; r <= 1; r++){
         for(int c = -1; c <= 1; c++){
             /* boundary guards
@@ -238,33 +371,15 @@ bool RandomTreeClass::isGoalReached(int i, int j){
 /* check if a path already exists before starting the algorithm
 */
 bool RandomTreeClass::isPathAlreadyExist(std::pair<int, int>& lastNode){
-    int px, py;
     /* check if any of the added nodes are an end cell coord
     */
     for(auto it = mp.begin(); it != mp.end(); it++){
-        px = it->first.first;
-        py = it->first.second;
-
-        if(isGoalReached(px, py)){
-            lastNode = std::make_pair(px, py);
+        if(isGoalReached(it->first)){
+            lastNode = it->first;
             return true;
         }
     }
     return false;
-}
-
-/* check if (i2,j2) is within step distance of (i1,j1)
-*/
-bool RandomTreeClass::isWithinStepDistance(int i1, int j1, int i2, int j2){
-    float distance = getDistanceBetweenCells(i1, j1, i2, j2);
-    return distance <= step;
-}
-
-/* check if (i2,j2) is within neighborood distance of (i1,j1)
-*/
-bool RandomTreeClass::isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2){
-    float distance = getDistanceBetweenCells(i1, j1, i2, j2);
-    return distance <= neighborhood;
 }
 
 void RandomTreeClass::setObstacleCells(void){
@@ -282,7 +397,7 @@ void RandomTreeClass::setObstacleCells(void){
     setCellAsObstacleStream(N/1.5, 0.8 * N, N-1, 0.8 * N, borderWidth, BOTTOM); 
 #endif
 #if RANDOM_OBSTACLE == 1
-
+    setRandomObstacles(numObstacles);
 #endif
 }
 
@@ -383,10 +498,10 @@ void RandomTreeClass::simulationStep(void){
                 /* STEP2, place node at step away from nearest node
                 */
 #if RAPID_RANDOM_TREE == 1
-                placeNode(rNode.first, rNode.second, newNode); 
+                placeNodeRRT(rNode, newNode); 
 #endif
-
 #if RAPID_RANDOM_TREE_STAR == 1
+                placeNodeRRTStar(rNode, newNode);
 #endif
             }
             /* STEP 3, check if you have reached end cell

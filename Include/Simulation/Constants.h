@@ -3,7 +3,7 @@
 
 /* step through render loop
 */
-#define STEP_MODE               0
+#define STEP_MODE                   0
 /* grid dimension NxN
 */
 const int N = 800;
@@ -12,15 +12,15 @@ const int N = 800;
 const int scale = 1;
 /* choose obstacle pattern
 */
-#define PREDEF_OBSTACLE         1
-#define RANDOM_OBSTACLE         0
+#define PREDEF_OBSTACLE             0
+#define RANDOM_OBSTACLE             1
 /* Algorithm params
 */
 const int step = 10;
 const int neighborhood = 5.0 * step;
 /* algorithm options
 */
-#define RAPID_RANDOM_TREE         0
-#define RAPID_RANDOM_TREE_STAR    1
+#define RAPID_RANDOM_TREE           0
+#define RAPID_RANDOM_TREE_STAR      1
 #endif /* SIMULATION_CONSTANTS_H
 */

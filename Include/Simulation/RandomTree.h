@@ -4,8 +4,6 @@
 #include "../../Include/Visualization/Grid/Grid.h"
 #include "../../Include/Utils/Tree.h"
 #include <vector>
-#include <cmath> /* for for round(), pow(). sqrt()
-*/
 
 /* all available states of a cell in the grid
 */
@@ -66,8 +64,11 @@ class RandomTreeClass: public GridClass, public TreeClass{
         /* other visual params
         */
         int otherCellHighlightWidth, endCellHighlightWidth, pathHighlightWidth;
-        float highlightAlpha;
-
+        float highlightAlpha, pathHighlightAlpha, nodeConnectionAlpha;
+        /* num random obstacles
+        */
+        int numObstacles;
+        
         /* util functions
         */
         int getIdx(int i, int j);
@@ -94,18 +95,21 @@ class RandomTreeClass: public GridClass, public TreeClass{
         void deHighlightPath(std::vector<std::pair<int, int>> path);
         void restartRenderLoop(void);
         int getRandomAmount(int start, int end);
+        float getDistanceBetweenCells(int i1, int j1, int i2, int j2);
+        void setRandomObstacles(int numObstacles);
 
         /* primary functions
         */
         std::pair<int, int> getRandomCell(void);
-        std::pair<int, int> getNearestNode(int i, int j);
-        float getDistanceBetweenCells(int i1, int j1, int i2, int j2);
-        bool isNodeValid(int& i, int& j);
-        bool placeNode(int i, int j, std::pair<int, int>& newNode);
-        bool isGoalReached(int i, int j);
+        std::pair<int, int> getNearestNode(std::pair<int, int> rNode);
+        bool isNodeValid(std::pair<int, int> nearestNode, std::pair<int, int>& newNode);
+        bool computeNewNodeAndValidate(std::pair<int, int> rNode, std::pair<int, int>& newNode);
+        bool createAndConnectNewNode(std::pair<int, int> nearestNode, 
+        std::pair<int, int> newNode);
+        bool placeNodeRRT(std::pair<int, int> rNode, std::pair<int, int>& newNode);
+        bool placeNodeRRTStar(std::pair<int, int> rNode, std::pair<int, int>& newNode);
+        bool isGoalReached(std::pair<int, int> dNode);
         bool isPathAlreadyExist(std::pair<int, int>& lastNode);
-        bool isWithinStepDistance(int i1, int j1, int i2, int j2);
-        bool isWithinNeighborhoodDistance(int i1, int j1, int i2, int j2);
 
     public:
         RandomTreeClass(int _step, int _neighborhood, int _N, int _scale, bool noStroke);
