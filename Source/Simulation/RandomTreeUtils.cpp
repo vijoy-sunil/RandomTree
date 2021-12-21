@@ -328,3 +328,30 @@ int RandomTreeClass::getRandomAmount(int start, int end){
 float RandomTreeClass::getDistanceBetweenCells(int i1, int j1, int i2, int j2){
     return sqrt(pow((j2 - j1), 2) + pow((i2 - i1), 2));
 }
+
+/* set random obstacle rectangles at (x,y) chosen at random
+ * with random width and height
+*/
+void RandomTreeClass::setRandomObstacles(int numObstacles){
+    while(numObstacles != 0){
+        int x = getRandomAmount(0, N-1);
+        int y = getRandomAmount(0, N-1);
+
+        int width = getRandomAmount(0.03 * N, N/10);
+        int height = getRandomAmount(0.03 * N, N/10);
+
+        for(int r = -width; r <= width; r++){
+            for(int c = -height; c <= height; c++){
+                /* boundary guards
+                */
+                if((x + r < 0) || (x + r > N-1))
+                    continue;
+                if((y + c < 0) || (y + c > N-1))
+                    continue;
+
+                setCellAsObstacle(x+r, y+c);
+            }
+        }
+        numObstacles--;
+    }
+}
